@@ -679,10 +679,8 @@ class Environment:
         print("Human State robot start: ",self.human_state)
 
         # Initialise variables
-        v = [0,0,0]
-        a = [0,0,0.1]
-        # startlook = datetime.now()
-        time_to_grab2 = time_to_grab - 0.5 # change: check if this works!
+        self.v = [0,0,0]
+        self.a = [0,0,0.1]
 
         # Check availability
         can_available = self.checkAvailability(can_nr)
@@ -699,10 +697,12 @@ class Environment:
 
             elif self.panda_type == 2 or self.panda_type == 3:
                 # Start gaze orientation
-                self.panda.lookAtPoint(can.getPos(),0.5)
+                startlook = datetime.now()
+                self.panda.lookAtPoint(can.getPos(),0.3)
+                time_to_grab2 = time_to_grab - (datetime.now()-startlook).total_seconds()
 
                 # Calculate path
-                pathcan = self.calculator.legibleTrajectory(self.panda.getEndLocation(), np.array(can.getPos()) + np.array([0,0,0.05*s]), startV=v, endA=a, distance=True)
+                pathcan = self.calculator.legibleTrajectory(self.panda.getEndLocation(), np.array(can.getPos()) + np.array([0,0,0.05*s]), startV=self.v, endA=self.a, distance=True)
                 
                 # Move to can
                 self.panda.realTimeSim(time_to_grab2, 0, pathcan, can.getPos())
@@ -727,7 +727,7 @@ class Environment:
                         if self.panda_type == 1:
                             pathcan = self.calculator.linearTrajectory(self.panda.getEndLocation(), panda_halfway)
                         elif self.panda_type == 3:
-                            pathcan = self.calculator.legibleTrajectory(self.panda.getEndLocation(), np.array(can.getPos()) + np.array([0,0,0.05*s]), startV=v, endA=a, distance=True)
+                            pathcan = self.calculator.legibleTrajectory(self.panda.getEndLocation(), panda_halfway, startV=self.v, endA=self.a, distance=True)
                         self.panda.realTimeSim(time_to_correct, 0, pathcan, None)
                     else:
                         can_available = False
@@ -748,7 +748,7 @@ class Environment:
                 self.panda.lookAtPoint(can.getPos(),0.2)
                 
                 # Calculate path
-                pathcan = self.calculator.legibleTrajectory(self.panda.getEndLocation(), np.array(can.getPos()) + np.array([0,0,0.05*s]), startV=v, endA=a, distance=True)
+                pathcan = self.calculator.legibleTrajectory(self.panda.getEndLocation(), np.array(can.getPos()) + np.array([0,0,0.05*s]), startV=self.v, endA=self.a, distance=True)
                 
                 # Move to can (correcting)
                 self.panda.realTimeSim(time_to_correct, 0, pathcan, can.getPos())
@@ -774,108 +774,6 @@ class Environment:
         self.panda.moveToBase()
         print("Object State at robot end: ", self.state)
         print("Human State at robot end: ",self.human_state)
-        
-
-        # # CONDITION 1
-        # elif self.panda_type == 1:
-        #     print("Anticipatory: Can: ", can_nr)
-        #     print("-----Object state at start: ", self.state[can_nr])
-        #     print("Human State start: ",self.human_state)
-
-        #     # Check availability
-        #     if self.checkAvailability(can_nr):
-
-        #         # Calculate trajectory to can
-        #         pathcan = calculator.linearTrajectory(self.panda.getEndLocation(), can.getPos())
-
-        #         # Start reaching for the can
-        #         self.panda.realTimeSim(time_to_grab, 0, pathcan, can.getPos())
-        #         self.robot_reached = self.checkPoint(can.getPos(), self.panda.getEndLocation())
-
-        #         while not self.robot_reached:
-        #             # Reach for can with anticipation
-        #             self.anticipateHuman(can, can_nr)
-
-        #             pathcan = calculator.linearTrajectory(self.panda.getEndLocation(), can.getPos())
-        #             self.panda.realTimeSim(time_to_correct, 0, pathcan, can.getPos())
-        #             self.robot_reached = self.checkPoint(can.getPos(), self.panda.getEndLocation())
-
-        #             # while reaching, check if available, otherwise return to base
-        #             if not self.checkAvailability(can_nr):
-        #                 self.panda.moveToBase()
-        #                 print(f"-----Object state {can_nr} not available (during reach): ", self.state[can_nr])
-        #                 print(self.state)
-        #                 break
-
-        #         self.robot_end_time = datetime.now()
-
-        #         # Put can into box
-        #         if self.robot_reached:
-        #              self.putCanInBox(can, can_nr)
-        
-        #     else:
-        #         self.robot_end_time = datetime.now()
-        #         self.panda.moveToBase()
-        #         print(f"-----Object state {can_nr} not available: ", self.state[can_nr])
-        #         print(self.state)
-
-        # # CONDITION 2        
-        # elif self.panda_type == 2:
-        #     print("Legible: Can: ", can_nr)
-        #     print("-----Object state at start: ", self.state[can_nr])
-
-        #     # Initialise variables
-        #     v = [0,0,0]
-        #     a = [0,0,0.1]
-            
-        #     # Start gaze orientation
-        #     startlook = datetime.now()
-        #     self.panda.lookAtPoint(can.getPos(),0.5)
-        #     print("Time to look: " + str((datetime.now()-startlook).total_seconds()))
-        #     time_to_grab2 = time_to_grab*1.18 - (datetime.now()-startlook).total_seconds()
-            
-        #     # Start reaching for the can
-        #     pathcan = calculator.legibleTrajectory(self.panda.getEndLocation(), np.array(can.getPos()) + np.array([0,0,0.05*s]), startV=v, endA=a, distance=True)
-        #     self.panda.realTimeSim(time_to_grab2, 0, pathcan, can.getPos())
-        #     #self.robot_reached = self.checkPoint(can_pos.getPos(), self.panda.getEndLocation())
-
-        #     while not self.robot_reached:
-        #         pathcan = calculator.legibleTrajectory(self.panda.getEndLocation(), can.getPos(), nrsteps=20, distance=True)
-        #         self.panda.realTimeSim(time_to_correct, 0, pathcan, can.getPos())
-        #         self.robot_reached = self.checkPoint(can.getPos(), self.panda.getEndLocation())
-
-        #         # while reaching, check if in hand, otherwise return to base
-        #         if not self.checkAvailability(can_nr):
-        #             self.panda.moveToBase()
-        #             print("-----Object state not available: ", self.state[can_nr])
-        #             break
-
-        #     self.robot_end_time = datetime.now()
-
-        #     # Put can into the box
-        #     if self.robot_reached:
-        #         self.putCanInBox(can, can_nr)
-
-        # # STILL TO BE WRITTEN
-        # elif self.panda_type == 3: 
-        #     print("Anticipatory + Legible: Can: ", can_nr)
-        #     print("-----Object state at start: ", self.state[can_nr])
-
-        #     # Calculate trajectory to can
-        #     pathcan = calculator.legibleTrajectory(self.panda.getEndLocation(), can.getPos(), startV=v, endA=a, distance=True)
-        #     self.panda.realTimeSim(time_to_grab2, 0, pathcan, can.getPos())
-
-
-        #     # Put can into the box
-        #     self.putCanInBox(can, can_nr)
-
-        #     #self.robot_chosen_can = can_pos.getID()
-    
-    # def resetCans(self, can_nr):
-    #     # Reset if 'predicted_target'
-    #     if self.human_state[can_nr] == "predicted_target":
-    #         self.state[can_nr] = "on_table"
-    #         print(f"----- Object state {can_nr} at start (reset): ", self.state[can_nr])
     
     def checkAvailability(self, can_nr):
         # Check if on table
@@ -919,50 +817,7 @@ class Environment:
 
     def find_cans(self, desired_state):
         return [idx for idx, can_state in enumerate(self.state) if can_state == desired_state ]
-    
-    # def anticipateHuman(self, can, can_nr):
-    
-    #     if self.human_state[can_nr] == "predicted_target":
-    #         print("-----Object state (replan): ", self.state)
-
-    #         # Continue trajectory to different can
-    #         self.new_can_list = list(range(nrCans))
-    #         self.new_can = random.choice(self.new_can_list)
-    #         while self.new_can == can_nr:
-    #             self.new_can = random.choice(self.new_can_list)
             
-    #         # CAN IS NOW THE WRONG CAN. THE CAN NEEDS TO BE CHANGED TO THE NEW_CAN CAN
-    #         if self.new_can != can_nr:       
-    #             # Check availability
-    #                 can_available = self.checkAvailability(self.new_can)
-
-    #                 robot_reached = False
-    #                 while can_available and not robot_reached:
-    #                     pathcan = self.calculator.linearTrajectory(self.panda.getEndLocation(), can.getPos())
-    #                     self.panda.realTimeSim(time_to_correct, 0, pathcan, can.getPos())
-    #                     robot_reached = self.checkPoint(can.getPos(), self.panda.getEndLocation())
-
-    #                     # while reaching, check if available, otherwise return to base
-    #                     can_available = self.checkAvailability(can_nr)
-                        
-    #                     #    self.panda.moveToBase()
-    #                     #    print(f"-----Object state {can_nr} not available (during reach): ", self.state[can_nr])
-    #                     #    print(self.state)
-    #                     #    break
-                
-    #                 self.robot_end_time = datetime.now()
-
-    #                 # Put can into box
-    #                 if robot_reached:
-    #                     self.putCanInBox()
-    #                 else:
-    #                     self.panda.moveToBase()
-    #                     print(f"-----Object state {can_nr} not available: ", self.state[can_nr])
-    #                     print(self.state)
-    #         else:
-    #             self.robot_end_time = np.NaN #datetime.now() # makes no sense
-            
-    
     def putCanInBox(self):
         
         # Grip the Can
@@ -971,10 +826,6 @@ class Environment:
         h = 0.3
         boxRelease = self.box.emptySpot()
         boxRelease = [boxRelease[0], boxRelease[1], boxRelease[2]+h*s]
-
-        # panda_halfway = self.panda.getEndLocation()[0], self.panda.getEndLocation()[1], self.panda.getEndLocation()[2]+0.2
-        # pathcan = self.calculator.linearTrajectory(self.panda.getEndLocation(), panda_halfway)
-        # self.panda.realTimeSim(time_to_correct, 0, pathcan, None)
 
         # Choose trajectory
         if self.panda_type == 2 or self.panda_type == 3:
@@ -986,52 +837,14 @@ class Environment:
         self.panda.realTimeSim(time_to_box, 0, pathBox, None)
 
         # Release can
+        time.sleep(0.5)
         self.panda.openGripper()
-
-#   will not work because of physics
-#        # Check with prints if correct things happen
-#        if self.box.inBox(can) or self.box.fellOnFloor(can):
-#            print("Robot finished a can")
-#            # print("Human State after robot finish: ",self.human_state)
-
-# not here, always do this in robotGraspEvents
-#        # Return to base
-#        self.panda.moveToBase()
-    
-    def resetEnvironment(self):
-        self.panda.moveToBase()
-        self.newPackage()
     
     def stopEnvironment(self):
         """"Stops the environment and disconnects."""
         self.stop_tracking = True
         time.sleep(0.1*SLEEP_TIME)
         p.disconnect()
-
-    # Tracking Method (STILL TO BE WRITTEN)
-    def tracking(self):
-        path2 = dataPath+str(participantID)+'_Con'+str(self.panda_type)+'_Tracking.xlsx'
-        writer = pd.ExcelWriter(path2)
-        title = pd.DataFrame([['Time', 'Gripper_location', 'Head_location', 'Head_orientation']], columns=['Time', 'Gripper_location', 'Head_location', 'Head_orientation'])
-        title.to_excel(writer,sheet_name='Sheet1', index = False,header= False)
-        writer.save()
-        self.writer_ready = True
-
-        while not self.stop_tracking:
-            events = p.getVREvents(p.VR_DEVICE_HMD + p.VR_DEVICE_GENERIC_TRACKER)
-            loc = self.panda.getEndLocation()
-            t = datetime.now()
-            if len(events) > 0:
-                pos = events[-1][1]
-                mat = p.getMatrixFromQuaternion(events[-1][2])
-                dir = [-mat[2], -mat[5], -mat[8]]
-                d = pd.DataFrame([[t, loc, pos, dir]])
-            else:
-                d = pd.DataFrame([[t, loc, np.nan, np.nan]])
-            d.to_excel(writer,sheet_name='Sheet1', startrow = writer.sheets['Sheet1'].max_row, index = False,header= False)
-            writer.save()
-            time.sleep(track_time)
-
 
 participantID = input("Please type participant ID: ")
 the_experiment = Experiment()

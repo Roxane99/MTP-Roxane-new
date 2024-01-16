@@ -176,7 +176,6 @@ class Panda:
 
         if final != None and (self.type == 2 or self.type==3):
             if step == 0:
-                # print(f"step: {step}, \n, path : {path}")
                 self.moveToPoint(path[step][0:3], final, True, tStep, close=path[step][4])
             else:
                 self.moveToPoint(path[step][0:3], final, close=path[step][4])
@@ -192,7 +191,7 @@ class Panda:
     def moveToPoint(self, target, final, grad=False, tStep=0, close=False):
         """Moves the robot to a point."""
 
-        # Condition 2 behaves differently
+        # Condition 2 and 3 behave differently
         if (self.type == 2 or self.type == 3) and final and not close:
             hand = self.calcHand(final,target)
             jointPoses = self.calcJoints2([8,11,12], [hand, target, self.calcGlasses(hand,target)])
@@ -251,7 +250,6 @@ class Panda:
         trajectory = path
         object = can
         links= self.distTwoLinks(hand,end)
-        print(f"path:{path}, \n can: {can}")
         r = math.sqrt(math.pow(links,2) / (math.pow(trajectory[0]-object[0],2) + math.pow(trajectory[1]-object[1],2) + math.pow(trajectory[2]-object[2],2)))
         ax = trajectory[0] - r*(object[0]-trajectory[0])
         ay = trajectory[1] - r*(object[1]-trajectory[1])

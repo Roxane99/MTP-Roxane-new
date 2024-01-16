@@ -69,7 +69,7 @@ class TrajectoryCalculator:
         predicted_position = (predicted_x, self.y_target, trajectory['current'][2])
         
         # You can use the following line to draw a line between current position and predicted position in PyBullet
-        p.addUserDebugLine(trajectory['current'], predicted_position, [1,0,0], lifeTime=1)  # Red color line for 1 second
+        # p.addUserDebugLine(trajectory['current'], predicted_position, [1,0,0], lifeTime=1)  # Red color line for 1 second
 
         return predicted_position
 
