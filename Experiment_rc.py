@@ -25,7 +25,7 @@ class Experiment:
 
     START_EXPERIMENT = "Now the real experiment starts. \n Make sure to return to \n the starting position after \n every successful boxing of a can."
     # START_CONDITION = "This is the start of a \n condition. Press the BIG ROUND \n button to continue."
-    START_TASK = "Press the BIG ROUND button \n to start with the first task. \n Please wait for the robot to start moving."
+    START_TASK = "Press the BIG ROUND button \n to start with the first task. Please \n wait for the robot to start moving."
     CONTINUE_TASK = "To continue with the next box \n press the BIG ROUND button"
     
     END_TASK = "This was the end of a trial. \n You can take off the headset \n and continue with the questionnaire."
@@ -42,7 +42,7 @@ class Experiment:
         # self.task_state = "not_done"
         self.condition_list = random.sample([0,1,2,3], 4)
         print(self.condition_list)
-        # self.condition_list = [2]
+        # self.condition_list = [0]
         
     def main(self):
         self.env = Environment()
@@ -737,7 +737,7 @@ class Environment:
             # Condition 0 and 1       
             if self.panda_type == 0 or self.panda_type == 1:
                 # Calculate path
-                pathcan = self.calculator.linearTrajectory(self.panda.getEndLocation(), can.getPos())
+                pathcan = self.calculator.linearTrajectory(self.panda.getEndLocation(), can.getPos(), nrsteps=10)
                 
                 # Move to can (correcting)
                 self.panda.realTimeSim(time_to_correct, 0, pathcan, can.getPos())
