@@ -24,7 +24,6 @@ class Experiment:
     REPEAT = "If you want to repeat this \n practice task, indicate this to \n the experimenter. Otherwise indicate \n that you want to start the experiment."
 
     START_EXPERIMENT = "Now the real experiment starts. \n Make sure to return to \n the starting position after \n every successful boxing of a can."
-    # START_CONDITION = "This is the start of a \n condition. Press the BIG ROUND \n button to continue."
     START_TASK = "Press the BIG ROUND button \n to start with the first task. Please \n wait for the robot to start moving."
     CONTINUE_TASK = "To continue with the next box \n press the BIG ROUND button"
     
@@ -36,13 +35,12 @@ class Experiment:
             participant: participant id
             condition: type of condition
         """
-        self.exp_data = pd.DataFrame() #columns=['ParticipantID', 'ConditionID', 'Task', 'Can', 'Robot Chosen Can', 'Robot Reach time (stc)','Completion Time (stf)'])
+        self.exp_data = pd.DataFrame()
         self.startNow = False
         self.stop = False
-        # self.task_state = "not_done"
         self.condition_list = random.sample([0,1,2,3], 4)
         print(self.condition_list)
-        # self.condition_list = [0]
+        # self.condition_list = [1]
         
     def main(self):
         self.env = Environment()
